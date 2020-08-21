@@ -1,6 +1,6 @@
 {
-    "name": "atom/router",
-    "description": "A simple psr-7 router for php",
+    "name": "phpatom/routing",
+    "description": "A simple psr-7 router for php based on nikic/fast-route",
     "type": "library",
     "require": {
         "nikic/fast-route": "^1.3",
