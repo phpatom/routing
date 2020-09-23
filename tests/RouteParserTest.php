@@ -1,9 +1,11 @@
 <?php
+
 namespace Atom\Routing\Test;
 
 use Atom\Routing\Route;
 use Atom\Routing\RouteGroup;
 use Atom\Routing\RouteParser;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class RouteParserTest extends TestCase
@@ -13,18 +15,19 @@ class RouteParserTest extends TestCase
      */
     public function testItGenerateUrlForSimpleRoute()
     {
-        $route = Route::get("bar/", "bar", "");
+        $route = Route::get("bar/", "", "bar");
         $parser = new RouteParser($route);
         $this->assertEquals("/bar", $parser->generateUrl());
     }
+
     /**
      * @group routerTest
      */
     public function testItGenerateUrlWithParameters()
     {
-        $route = Route::get("bar/{id:\d+}-{slug:[a-z\-]+}", "bar", "");
+        $route = Route::get("bar/{id:\d+}-{slug:[a-z\-]+}", "", "bar");
         $parser = new RouteParser($route);
-        $this->assertEquals("/bar/47-aze-aze", $parser->generateUrl(["id"=>"47","slug"=>"aze-aze"]));
+        $this->assertEquals("/bar/47-aze-aze", $parser->generateUrl(["id" => "47", "slug" => "aze-aze"]));
     }
 
     /**
@@ -36,7 +39,7 @@ class RouteParserTest extends TestCase
         $routeGroup = new RouteGroup("/foo/");
         $route->setRouteGroup($routeGroup);
         $parser = new RouteParser($route);
-        $this->assertEquals("/foo/bar/47-aze-aze", $parser->generateUrl(["id"=>"47","slug"=>"aze-aze"]));
+        $this->assertEquals("/foo/bar/47-aze-aze", $parser->generateUrl(["id" => "47", "slug" => "aze-aze"]));
     }
 
     /**
@@ -48,7 +51,7 @@ class RouteParserTest extends TestCase
         $routeGroup = new RouteGroup("/foo/");
         $route->setRouteGroup($routeGroup);
         $parser = new RouteParser($route);
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $parser->generateUrl();
     }
 }

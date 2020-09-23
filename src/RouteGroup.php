@@ -1,9 +1,9 @@
 <?php
 namespace Atom\Routing;
 
-use Atom\Contracts\Routing\AbstractRouteContract;
-use Atom\Contracts\Routing\RouteContract;
-use Atom\Contracts\Routing\RouteGroupContract;
+use Atom\Routing\Contracts\AbstractRouteContract;
+use Atom\Routing\Contracts\RouteContract;
+use Atom\Routing\Contracts\RouteGroupContract;
 use Psr\Http\Server\MiddlewareInterface;
 use RuntimeException;
 
@@ -13,7 +13,7 @@ class RouteGroup implements RouteGroupContract
      * @var RouteContract[]
      */
     private $routes = [];
-    private $middleware;
+    private $handler;
     private $pattern;
 
     public function __construct(String $pattern)
@@ -60,13 +60,13 @@ class RouteGroup implements RouteGroupContract
     }
 
     /**
-     * @param String|MiddlewareInterface $middleware
+     * @param String|MiddlewareInterface $handler
      * @return AbstractRouteContract
      */
-    public function setMiddleware($middleware):AbstractRouteContract
+    public function setHandler($handler):AbstractRouteContract
     {
-        if (!($middleware instanceof MiddlewareInterface) || !(is_string($middleware))) {
-            $this->middleware = $middleware;
+        if (!($handler instanceof MiddlewareInterface) || !(is_string($handler))) {
+            $this->handler = $handler;
             return $this;
         }
         throw new RuntimeException("Parameter middleware of RouteGroup must be a either a string 
@@ -76,8 +76,8 @@ class RouteGroup implements RouteGroupContract
     /**
      * @return mixed
      */
-    public function getMiddleware()
+    public function getHandler()
     {
-        return $this->middleware;
+        return $this->handler;
     }
 }

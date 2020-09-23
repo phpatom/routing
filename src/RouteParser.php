@@ -2,7 +2,7 @@
 
 namespace Atom\Routing;
 
-use Atom\Contracts\Routing\RouteContract;
+use Atom\Routing\Contracts\RouteContract;
 use FastRoute\RouteParser\Std;
 use InvalidArgumentException;
 

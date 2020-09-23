@@ -1,13 +1,12 @@
 <?php
+
 namespace Atom\Routing;
 
-use Atom\Contracts\Routing\AbstractRouteContract;
-use Atom\Contracts\Routing\RouteContract;
-use Atom\Contracts\Routing\RouteGroupContract;
+use Atom\Routing\Contracts\AbstractRouteContract;
+use Atom\Routing\Contracts\RouteContract;
+use Atom\Routing\Contracts\RouteGroupContract;
 use Fig\Http\Message\RequestMethodInterface;
 use InvalidArgumentexception;
-use Psr\Http\Server\MiddlewareInterface;
-use RuntimeException;
 
 class Route implements RouteContract
 {
@@ -23,7 +22,7 @@ class Route implements RouteContract
         RequestMethodInterface::METHOD_TRACE,
         RequestMethodInterface::METHOD_CONNECT,
     ];
-    
+
     private $routeGroup;
     private $pattern;
     private $name;
@@ -31,36 +30,37 @@ class Route implements RouteContract
      * @var string[]
      */
     private $methods;
-    private $middleware;
+    private $handler;
 
     /**
      * Route constructor.
      * @param $methods
      * @param String $pattern
      * @param String $name
-     * @param String $middleware
+     * @param $handler
      */
-    public function __construct($methods, String $pattern, String $name, String $middleware)
+    public function __construct($methods, string $pattern, $handler, string $name)
     {
         $this->name = $name;
         $this->pattern = $pattern;
-        $this->middleware = $middleware;
+        $this->handler = $handler;
         if (is_string($methods)) {
             $methods = [$methods];
         }
         $this->setMethods($methods);
     }
+
     public function __clone()
     {
-        return new self($this->methods, $this->pattern, $this->name, $this->middleware);
+        return new self($this->methods, $this->pattern, $this->handler, $this->name);
     }
 
-    public function getRouteGroup():?RouteGroupContract
+    public function getRouteGroup(): ?RouteGroupContract
     {
         return $this->routeGroup;
     }
 
-    public function setRouteGroup(RouteGroupContract $routeGroup):AbstractRouteContract
+    public function setRouteGroup(RouteGroupContract $routeGroup): AbstractRouteContract
     {
         $this->routeGroup = $routeGroup;
         return $this;
@@ -70,7 +70,7 @@ class Route implements RouteContract
      * @param array $methods
      * @return AbstractRouteContract
      */
-    public function setMethods(Array $methods):AbstractRouteContract
+    public function setMethods(array $methods): AbstractRouteContract
     {
         foreach ($methods as $method) {
             if (!is_string($method)) {
@@ -85,19 +85,19 @@ class Route implements RouteContract
         return $this;
     }
 
-    public function setPattern(String $pattern):AbstractRouteContract
+    public function setPattern(string $pattern): AbstractRouteContract
     {
         $this->pattern = $pattern;
         return $this;
     }
 
-    public function setName(String $name):AbstractRouteContract
+    public function setName(string $name): AbstractRouteContract
     {
         $this->name = $name;
         return $this;
     }
 
-    public function getName():String
+    public function getName(): string
     {
         return $this->name;
     }
@@ -105,7 +105,7 @@ class Route implements RouteContract
     /**
      * @return string[]
      */
-    public function getMethods():array
+    public function getMethods(): array
     {
         return $this->methods;
     }
@@ -113,92 +113,87 @@ class Route implements RouteContract
     /**
      * @return String
      */
-    public function getPattern():String
+    public function getPattern(): string
     {
         return $this->pattern;
     }
 
-    
-    public function setMiddleware($middleware):AbstractRouteContract
+
+    public function setHandler($handler): AbstractRouteContract
     {
-        //TODO: mix la validation du route group et du route
-        if (!($middleware instanceof MiddlewareInterface) || !(is_string($middleware))) {
-            $this->middleware = $middleware;
-            return $this;
-        }
-        throw new RuntimeException("Parameter middleware of RouteGroup must be a either a string 
-	    or an instance of MiddlewareInterface");
+        $this->handler = $handler;
+        return $this;
     }
 
-    public function getMiddleware():String
+    public function getHandler()
     {
-        return $this->middleware;
+        return $this->handler;
     }
 
     /**
      * @param array $methods
      * @param String $pattern
-     * @param String $name
-     * @param String $middleware
+     * @param String $handler
+     * @param string|null $name
      * @return static
      */
-    public static function create(Array $methods, String $pattern, String $name, String $middleware):self
+    public static function create(array $methods, string $pattern, string $handler, ?string $name = null): self
     {
-        return new self($methods, $pattern, $name, $middleware);
+        return new self($methods, $pattern, $name, $handler);
     }
 
     /**
      * @param String $pattern
-     * @param String $name
-     * @param String $middleware
+     * @param String $handler
+     * @param string|null $name
      * @return static
      */
-    public static function get(String $pattern, String $name, String $middleware):self
+    public static function get(string $pattern, string $handler, ?string $name = null): self
     {
-        return new self(['GET'], $pattern, $name, $middleware);
+        return new self(['GET'], $pattern, $handler, $name);
     }
 
     /**
      * @param String $pattern
-     * @param String $name
-     * @param String $middleware
+     * @param String $handler
+     * @param string|null $name
      * @return static
      */
-    public static function post(String $pattern, String $name, String $middleware):self
+    public static function post(string $pattern, string $handler, ?string $name = null): self
     {
-        return new self(['POST'], $pattern, $name, $middleware);
+        return new self(['POST'], $pattern, $handler, $name);
     }
 
     /**
      * @param String $pattern
-     * @param String $name
-     * @param String $middleware
+     * @param String $handler
+     * @param string|null $name
      * @return static
      */
-    public static function put(String $pattern, String $name, String $middleware):self
+    public static function put(string $pattern, string $handler, ?string $name = null): self
     {
-        return new self(['PUT'], $pattern, $name, $middleware);
+        return new self(['PUT'], $pattern, $handler, $name);
     }
 
     /**
      * @param String $pattern
-     * @param String $name
-     * @param String $middleware
+     * @param String $handler
+     * @param string|null $name
      * @return static
      */
-    public static function patch(String $pattern, String $name, String $middleware):self
+    public static function patch(string $pattern, string $handler, ?string $name = null): self
     {
-        return new self(['PATCH'], $pattern, $name, $middleware);
+        return new self(['PATCH'], $pattern, $handler, $name);
     }
 
     /**
      * @param String $pattern
-     * @param String $name
-     * @param String $middleware
+     * @param String $handler
+     * @param string|null $name
      * @return static
      */
-    public static function delete(String $pattern, String $name, String $middleware):self
+    public static function delete(string $pattern, string $handler, ?string $name = null): self
     {
-        return new self(['DELETE'], $pattern, $name, $middleware);
+        return new self(['DELETE'], $pattern, $handler, $name);
     }
 }

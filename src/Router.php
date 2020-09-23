@@ -1,10 +1,11 @@
 <?php
+
 namespace Atom\Routing;
 
-use Atom\Contracts\Routing\AbstractRouteContract;
-use Atom\Contracts\Routing\RouteContract;
-use Atom\Contracts\Routing\RouteGroupContract;
-use Atom\Contracts\Routing\RouterContract;
+use Atom\Routing\Contracts\AbstractRouteContract;
+use Atom\Routing\Contracts\RouteContract;
+use Atom\Routing\Contracts\RouteGroupContract;
+use Atom\Routing\Contracts\RouterContract;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Atom\Routing\Exceptions\MethodNotAllowedException;
@@ -31,9 +32,7 @@ class Router implements RouterContract
      */
     private $dispatcher;
 
-    private $request;
-
-    const MATCHED_ROUTE_ATTRIBUTE_KEY = 'MATCHED_ROUTE';
+    const MATCHED_ROUTE_ATTRIBUTE_KEY = '_route';
     /**
      * @var null
      */
@@ -60,10 +59,10 @@ class Router implements RouterContract
      * @param AbstractRouteContract $route
      * @return RouterContract
      */
-    public function add(AbstractRouteContract $route):RouterContract
+    public function add(AbstractRouteContract $route): RouterContract
     {
         if ($route instanceof RouteContract) {
-            $this->routes[]  = $route;
+            $this->routes[] = $route;
         } else {
             $this->routeGroups[] = $route;
         }
@@ -73,46 +72,50 @@ class Router implements RouterContract
     /**
      * @param $prefix
      * @param callable $callable
-     * @param null $middleware
+     * @param null $handler
      * @return $this
      */
-    public function group($prefix, callable $callable, $middleware = null)
+    public function group($prefix, callable $callable, $handler = null)
     {
         $routeGroup = new RouteGroup($prefix);
         $callable($routeGroup);
-        if (!is_null($middleware)) {
-            $routeGroup->setMiddleware($middleware);
+        if (!is_null($handler)) {
+            $routeGroup->setHandler($handler);
         }
         $this->routeGroups[] = $routeGroup;
         return $this;
     }
+
     /**
      * @param ServerRequestInterface $request
-     * @return MatchedRoute
+     * @return ServerRequestInterface
      * @throws MethodNotAllowedException
      * @throws RouteNotFoundException
      */
     public function dispatch(ServerRequestInterface $request)
     {
-        $this->request = $request;
         $this->initDispatcher();
-        $path  = RouteParser::sanitizePath($request->getUri()->getPath());
-        $routeInfo  = $this->dispatcher->dispatch($request->getMethod(), $path);
+        $path = RouteParser::sanitizePath($request->getUri()->getPath());
+        $routeInfo = $this->dispatcher->dispatch($request->getMethod(), $path);
 
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 throw new RouteNotFoundException('Route not found');
-                break;
             case Dispatcher::METHOD_NOT_ALLOWED:
                 $allowedMethods = implode($routeInfo[1], ', ');
                 throw new MethodNotAllowedException("Method not allowed for the current route. 
                 Methods Allowed are [{$allowedMethods}]");
-                break;
             case Dispatcher::FOUND:
                 $handler = $routeInfo[1];
                 $vars = $routeInfo[2];
-                return new MatchedRoute($handler, $vars);
-                break;
+                $request = $request->withAttribute(
+                    self::MATCHED_ROUTE_ATTRIBUTE_KEY,
+                    new MatchedRoute($handler, $vars, $request->getMethod(), $request->getUri()->getPath())
+                );
+                if ($this->host == null) {
+                    $this->host = $request->getUri()->getHost();
+                }
+                return $request;
         }
         throw new RouteNotFoundException('Route not found');
     }
@@ -123,7 +126,7 @@ class Router implements RouterContract
      * @return string
      * @throws RouteNotFoundException
      */
-    public function generateUrl(string $name, array $data = []) : string
+    public function generateUrl(string $name, array $data = []): string
     {
         $this->initDispatcher();
         $route = $this->getRouteByName($name);
@@ -137,7 +140,7 @@ class Router implements RouterContract
      * @param String $name
      * @return Route
      */
-    public function getRouteByName(String $name): Route
+    public function getRouteByName(string $name): ?RouteContract
     {
         foreach ($this->routes as $route) {
             if ($route->getName() === $name) {
@@ -167,7 +170,7 @@ class Router implements RouterContract
         if (!$this->host) {
             return $path;
         }
-        return RouteParser::removeTrailingSlash($this->host).RouteParser::sanitizePath($path);
+        return RouteParser::removeTrailingSlash($this->host) . RouteParser::sanitizePath($path);
     }
 
     /**
@@ -198,16 +201,20 @@ class Router implements RouterContract
     private function dispatchRoutesGroups(RouteCollector $r)
     {
         foreach ($this->routeGroups as $routeGroup) {
-            $r->addGroup(RouteParser::sanitizePath($routeGroup->getPattern()), function (RouteCollector $r)
- use ($routeGroup) {
-                foreach ($routeGroup->getRoutes() as $route) {
-                    $r->addRoute(
-                        $route->getMethods(),
-                        RouteParser::removeTrailingSlash($route->getPattern()),
-                        $route
-                    );
+            $r->addGroup(
+                RouteParser::sanitizePath(
+                    $routeGroup->getPattern()
+                ),
+                function (RouteCollector $r) use ($routeGroup) {
+                    foreach ($routeGroup->getRoutes() as $route) {
+                        $r->addRoute(
+                            $route->getMethods(),
+                            RouteParser::removeTrailingSlash($route->getPattern()),
+                            $route
+                        );
+                    }
                 }
-            });
+            );
         }
     }
 
@@ -226,7 +233,7 @@ class Router implements RouterContract
         return $this->dispatcher;
     }
 
-    public function getMatchedRoute(ServerRequestInterface $request):MatchedRoute
+    public function getMatchedRoute(ServerRequestInterface $request): MatchedRoute
     {
         return $request->getAttribute(self::MATCHED_ROUTE_ATTRIBUTE_KEY);
     }

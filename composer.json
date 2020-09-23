@@ -6,8 +6,7 @@
         "nikic/fast-route": "^1.3",
         "psr/http-message": "^1.0",
         "psr/http-server-middleware": "^1.0",
-        "fig/http-message-util": "^1.1",
-        "phpatom/contracts": "0.1.0"
+        "fig/http-message-util": "^1.1"
     },
     "autoload": {
         "psr-4": {
