@@ -133,66 +133,66 @@ class Route implements RouteContract
     /**
      * @param array $methods
      * @param String $pattern
-     * @param String $handler
+     * @param $handler
      * @param string|null $name
      * @return static
      */
-    public static function create(array $methods, string $pattern, string $handler, ?string $name = null): self
+    public static function create(array $methods, string $pattern, $handler, ?string $name = null): self
     {
         return new self($methods, $pattern, $name, $handler);
     }
 
     /**
      * @param String $pattern
-     * @param String $handler
+     * @param $handler
      * @param string|null $name
      * @return static
      */
-    public static function get(string $pattern, string $handler, ?string $name = null): self
+    public static function get(string $pattern, $handler, ?string $name = null): self
     {
         return new self(['GET'], $pattern, $handler, $name);
     }
 
     /**
      * @param String $pattern
-     * @param String $handler
+     * @param $handler
      * @param string|null $name
      * @return static
      */
-    public static function post(string $pattern, string $handler, ?string $name = null): self
+    public static function post(string $pattern, $handler, ?string $name = null): self
     {
         return new self(['POST'], $pattern, $handler, $name);
     }
 
     /**
      * @param String $pattern
-     * @param String $handler
+     * @param $handler
      * @param string|null $name
      * @return static
      */
-    public static function put(string $pattern, string $handler, ?string $name = null): self
+    public static function put(string $pattern, $handler, ?string $name = null): self
     {
         return new self(['PUT'], $pattern, $handler, $name);
     }
 
     /**
      * @param String $pattern
-     * @param String $handler
+     * @param $handler
      * @param string|null $name
      * @return static
      */
-    public static function patch(string $pattern, string $handler, ?string $name = null): self
+    public static function patch(string $pattern, $handler, ?string $name = null): self
     {
         return new self(['PATCH'], $pattern, $handler, $name);
     }
 
     /**
      * @param String $pattern
-     * @param String $handler
+     * @param $handler
      * @param string|null $name
      * @return static
      */
-    public static function delete(string $pattern, string $handler, ?string $name = null): self
+    public static function delete(string $pattern, $handler, ?string $name = null): self
     {
         return new self(['DELETE'], $pattern, $handler, $name);
     }
