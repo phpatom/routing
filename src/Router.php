@@ -115,7 +115,7 @@ class Router implements RouterContract
                     new MatchedRoute($handler, $vars, $request->getMethod(), $request->getUri()->getPath())
                 );
                 if ($this->host == null) {
-                    $this->host = $request->getUri()->getHost();
+                    $this->host = $request->getUri()->getScheme() . "://" . $request->getUri()->getAuthority();
                 }
                 return $request;
         }
