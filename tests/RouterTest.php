@@ -13,7 +13,6 @@ use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use Psr\Http\Server\MiddlewareInterface;
 
 class RouterTest extends TestCase
 {
@@ -66,8 +65,8 @@ class RouterTest extends TestCase
     {
         $router = $this->createRouter();
         $route = $this->createStub(RouteContract::class);
-        $middleware = $this->createStub(MiddlewareInterface::class);
-        $middleware2 = $this->createStub(MiddlewareInterface::class);
+        $middleware = "myMiddleware";
+        $middleware2 = "myMiddleware2";
         $router->group("foo", function (RouteGroupContract $group) use ($route) {
             $group->add($route);
         }, $middleware);

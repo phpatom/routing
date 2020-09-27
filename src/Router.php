@@ -15,6 +15,8 @@ use function FastRoute\simpleDispatcher;
 
 class Router implements RouterContract
 {
+    use CanRegisterRoute;
+
     /**
      * @var RouterContract | null
      */
@@ -236,5 +238,10 @@ class Router implements RouterContract
     public function getMatchedRoute(ServerRequestInterface $request): MatchedRoute
     {
         return $request->getAttribute(self::MATCHED_ROUTE_ATTRIBUTE_KEY);
+    }
+
+    protected function registerRoute(Route $route)
+    {
+        $this->add($route);
     }
 }

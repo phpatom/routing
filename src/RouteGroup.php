@@ -1,14 +1,15 @@
 <?php
+
 namespace Atom\Routing;
 
 use Atom\Routing\Contracts\AbstractRouteContract;
 use Atom\Routing\Contracts\RouteContract;
 use Atom\Routing\Contracts\RouteGroupContract;
-use Psr\Http\Server\MiddlewareInterface;
-use RuntimeException;
 
 class RouteGroup implements RouteGroupContract
 {
+    use CanRegisterRoute;
+
     /**
      * @var RouteContract[]
      */
@@ -16,7 +17,7 @@ class RouteGroup implements RouteGroupContract
     private $handler;
     private $pattern;
 
-    public function __construct(String $pattern)
+    public function __construct(string $pattern)
     {
         $this->pattern = $pattern;
     }
@@ -25,7 +26,7 @@ class RouteGroup implements RouteGroupContract
      * @param RouteContract $route
      * @return RouteGroupContract
      */
-    public function add(RouteContract $route):RouteGroupContract
+    public function add(RouteContract $route): RouteGroupContract
     {
         $route = clone $route;
         $route->setRouteGroup($this);
@@ -36,7 +37,7 @@ class RouteGroup implements RouteGroupContract
     /**
      * @return RouteContract[]
      */
-    public function getRoutes():array
+    public function getRoutes(): array
     {
         return $this->routes;
     }
@@ -44,7 +45,7 @@ class RouteGroup implements RouteGroupContract
     /**
      * @return String
      */
-    public function getPattern():String
+    public function getPattern(): string
     {
         return $this->pattern;
     }
@@ -53,24 +54,20 @@ class RouteGroup implements RouteGroupContract
      * @param String $pattern
      * @return AbstractRouteContract
      */
-    public function setPattern(String $pattern):AbstractRouteContract
+    public function setPattern(string $pattern): AbstractRouteContract
     {
         $this->pattern = $pattern;
         return $this;
     }
 
     /**
-     * @param String|MiddlewareInterface $handler
+     * @param $handler
      * @return AbstractRouteContract
      */
-    public function setHandler($handler):AbstractRouteContract
+    public function setHandler($handler): AbstractRouteContract
     {
-        if (!($handler instanceof MiddlewareInterface) || !(is_string($handler))) {
-            $this->handler = $handler;
-            return $this;
-        }
-        throw new RuntimeException("Parameter middleware of RouteGroup must be a either a string 
-	    or an instance of MiddlewareInterface");
+        $this->handler = $handler;
+        return $this;
     }
 
     /**
@@ -79,5 +76,10 @@ class RouteGroup implements RouteGroupContract
     public function getHandler()
     {
         return $this->handler;
+    }
+
+    protected function registerRoute(Route $route)
+    {
+        $this->add($route);
     }
 }
