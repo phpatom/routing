@@ -36,10 +36,10 @@ class Route implements RouteContract
      * Route constructor.
      * @param $methods
      * @param String $pattern
-     * @param String $name
      * @param $handler
+     * @param string|null $name
      */
-    public function __construct($methods, string $pattern, $handler, string $name)
+    public function __construct($methods, string $pattern, $handler, ?string $name = null)
     {
         $this->name = $name;
         $this->pattern = $pattern;
