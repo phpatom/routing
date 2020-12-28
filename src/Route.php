@@ -139,7 +139,7 @@ class Route implements RouteContract
      */
     public static function create(array $methods, string $pattern, $handler, ?string $name = null): self
     {
-        return new self($methods, $pattern, $name, $handler);
+        return new self($methods, $pattern, $handler, $name);
     }
 
     /**

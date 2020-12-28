@@ -13,9 +13,9 @@ class RouteGroup implements RouteGroupContract
     /**
      * @var RouteContract[]
      */
-    private $routes = [];
+    private array $routes = [];
     private $handler;
-    private $pattern;
+    private string $pattern;
 
     public function __construct(string $pattern)
     {
